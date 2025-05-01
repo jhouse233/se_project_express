@@ -30,7 +30,7 @@ const createUser = (req, res) => {
       avatar: user.avatar
     }))
     .catch(err => {
-      if (err.na,e === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Bad Request'});
       }
       return res.status(500).send({ message: 'Internal Server Error'});
