@@ -1,9 +1,10 @@
 const User = require('../models/user');
+const { CREATED, BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR } = require('../utils/constants');
 
 const getUsers = (req, res) => {
   User.find({})
     .then(users => res.send(users))
-    .catch((err) => res.status(500).send({ message: 'Error getting users', error: err.message}));
+    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error getting users', error: err.message}));
 };
 
 const getUserById = (req, res) => {
@@ -11,36 +12,36 @@ const getUserById = (req, res) => {
   User.findById(userId)
     .then(user => {
       if (!user) {
-        return res.status(404).send({message: 'User not found'});
+        return res.status(NOT_FOUND).send({message: 'User not found'});
       }
       return res.send(user);
     })
     .catch(err => {
       if (err.name === 'CastError') {
-        return res.status(400).send({
+        return res.status(BAD_REQUEST).send({
           message: 'Invalid user ID'
         });
       }
-      return res.status(500).send({ message: 'Error getting user'});
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Error getting user'});
     });
 };
 
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
   if (!name || !avatar){
-    return res.status(400).send({ message: 'Bad Request' });
+    return res.status(BAD_REQUEST).send({ message: 'Bad Request' });
   }
   return User.create({ name, avatar })
-    .then(user => res.status(201).send({
+    .then(user => res.status(CREATED).send({
       _id: user._id,
       name:user.name,
       avatar: user.avatar
     }))
     .catch(err => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({ message: 'Bad Request'});
+        return res.status(BAD_REQUEST).send({ message: 'Bad Request'});
       }
-      return res.status(500).send({ message: 'Internal Server Error'});
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Internal Server Error'});
     });
 };
 
