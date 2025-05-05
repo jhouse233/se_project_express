@@ -1,111 +1,135 @@
 const ClothingItem = require('../models/clothingitem');
-const BadRequestError = require("../utils/Errors/BadRequestError");
-const ForbiddenError = require("../utils/Errors/ForbiddenError");
-const NotFoundError = require("../utils/Errors/NotFoundError");
 
+const TEST_USER_ID = '68123daa710934366df09dd9';
 
-
-
-
-const getAllItems = async (req, res, next) => {
+const getAllItems = async (req, res) => {
   try {
     const items = await ClothingItem.find();
-    res.status(200).json({ data: items })
+    return res.status(200).json({ data: items });
   } catch (err) {
-    next(err);
+    return res.status(500).send({
+      message: 'An error occurred on the server'
+    });
   }
 };
 
-const createItem = async (req, res, next) => {
+const createItem = async (req, res) => {
   try {
     const { name, weather, imageUrl } = req.body;
 
     if (!name || !weather || !imageUrl) {
-      throw new BadRequestError('Name, weather, and imageUrl are required');
+      return res.status(400).send({
+        message: 'Name, weather, and imageUrl are required'
+      });
     }
 
     const item = await ClothingItem.create({
       name,
       weather,
       imageUrl,
-      owner: req.user._id
+      owner: TEST_USER_ID
     });
-    res.status(201).send({ data: item });
-  } catch(err) {
+    return res.status(201).send({ data: item });
+  } catch (err) {
     if (err.name === 'ValidationError') {
-      next(new BadRequestError('Invalid data format'))
-    } else {
-      next(err);
+      return res.status(400).send({
+        message: 'Invalid data format'
+      });
     }
+    return res.status(500).send({
+      message: 'An error occurred on the server'
+    });
   }
 };
 
-const deleteItem = async (req, res, next) => {
-  const { itemId } = req.params;
+const deleteItem = async (req, res) => {
   try {
-    const item = await ClothingItem.findById(itemId).orFail()
+    const { itemId } = req.params;
+    const item = await ClothingItem.findById(itemId);
 
-    if (item.owner.toString() !== req.user._id) {
-      throw new ForbiddenError('You do not have permission to delete this item')
+    if (!item) {
+      return res.status(404).send({
+        message: 'Item not found'
+      });
     }
 
-    await item.deleteOne();
-    return res.status(204).send();
+    await ClothingItem.findByIdAndDelete(itemId);
+    return res.status(200).send({
+      message: 'Item deleted successfully'
+    });
 
   } catch (err) {
     if (err.name === 'CastError') {
-      next(new BadRequestError('Data format is invalid'));
-    } else if (err.name === 'DocumentNotFoundError') {
-      next(new NotFoundError('Requested resource not found'))
-    } else {
-      next(err);
+      return res.status(400).send({
+        message: 'Invalid item ID'
+      });
     }
+    return res.status(500).send({
+      message: 'An error occurred on the server'
+    });
   }
 };
 
-const addLike = async (req, res, next) => {
-  const { itemId } = req.params;
+const addLike = async (req, res) => {
   try {
-    const item = await ClothingItem.findByIdAndUpdate(
+    const { itemId } = req.params;
+    const item = await ClothingItem.findById(itemId);
+
+    if (!item) {
+      return res.status(404).send({
+        message: 'Item not found'
+      });
+    }
+
+    const updatedItem = await ClothingItem.findByIdAndUpdate(
       itemId,
-      { $addToSet: { likes: req.user._id }},
+      { $addToSet: { likes: TEST_USER_ID } },
       { new: true }
-    ).orFail();
+    );
 
-    return res.status(200).json({ data: item})
+    return res.status(200).json({ data: updatedItem });
+
   } catch (err) {
     if (err.name === 'CastError') {
-      next(new BadRequestError('Invalid item ID'))
-    } else if (err.name === 'DocumentNotFoundError') {
-      next(new NotFoundError('Item not found'));
-    } else {
-      next(err);
+      return res.status(400).send({
+        message: 'Invalid item ID'
+      });
     }
+    return res.status(500).send({
+      message: 'An error occurred on the server'
+    });
   }
 };
 
-const removeLike = async (req, res, next) => {
-  const { itemId } = req.params;
+const removeLike = async (req, res) => {
   try {
-    const item = await ClothingItem.findByIdAndUpdate(
-      itemId,
-      { $pull: { likes: req.user._id } },
-      { new: true },
-    ).orFail()
-    return res.status(200).json({ data: item })
-  } catch (err) {
-    if (err.name === 'DocumentNotFoundError') {
-      next(new NotFoundError('Requested resource not found'))
-    } else if (err.name === 'CastError') {
-      next(new BadRequestError('Invalid Data'))
-    } else {
-      next(err);
+    const { itemId } = req.params;
+    const item = await ClothingItem.findById(itemId);
+
+    if (!item) {
+      return res.status(404).send({
+        message: 'Item not found'
+      });
     }
+
+    const updatedItem = await ClothingItem.findByIdAndUpdate(
+      itemId,
+      { $pull: { likes: TEST_USER_ID } },
+      { new: true }
+    );
+
+    return res.status(200).json({ data: updatedItem });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).send({
+        message: 'Invalid item ID'
+      });
+    }
+    return res.status(500).send({
+      message: 'An error occurred on the server'
+    });
   }
-}
-
-
-
+};
 
 module.exports = {
   getAllItems,

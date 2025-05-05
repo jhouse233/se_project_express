@@ -1,9 +1,9 @@
-const User = require('../models/user.js');
+const User = require('../models/user');
 
 const getUsers = (req, res) => {
   User.find({})
     .then(users => res.send(users))
-    .catch(err => res.status(500).send({ message: 'Error getting users', error: err.message}));
+    .catch((err) => res.status(500).send({ message: 'Error getting users', error: err.message}));
 };
 
 const getUserById = (req, res) => {
@@ -13,9 +13,16 @@ const getUserById = (req, res) => {
       if (!user) {
         return res.status(404).send({message: 'User not found'});
       }
-      res.send(user);
+      return res.send(user);
     })
-    .catch(err => res.status(500).send({ message: 'Error getting user', error: err.message}));
+    .catch(err => {
+      if (err.name === 'CastError') {
+        return res.status(400).send({
+          message: 'Invalid user ID'
+        });
+      }
+      return res.status(500).send({ message: 'Error getting user'});
+    });
 };
 
 const createUser = (req, res) => {
@@ -23,7 +30,7 @@ const createUser = (req, res) => {
   if (!name || !avatar){
     return res.status(400).send({ message: 'Bad Request' });
   }
-  User.create({ name, avatar })
+  return User.create({ name, avatar })
     .then(user => res.status(201).send({
       _id: user._id,
       name:user.name,
