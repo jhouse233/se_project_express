@@ -35,6 +35,9 @@ const userSchema = new mongoose.Schema({
 
 });
 
+userSchema.index({ email: 1 }, { unique: true });
+
+
 userSchema.statics.findUserByCredentials = function(email, password) {
   return this.findOne({ email }).select('+password')
     .then(user => {
@@ -50,6 +53,7 @@ userSchema.statics.findUserByCredentials = function(email, password) {
         })
     })
 }
+
 
 
 const User = mongoose.model('User', userSchema);

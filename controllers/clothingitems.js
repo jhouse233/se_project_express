@@ -15,10 +15,13 @@ const getAllItems = async (req, res) => {
 };
 
 const createItem = async (req, res) => {
+  console.log('===CREATE ITEM FUNCTION CALLED===')
+  console.log('Request body:', req.body);
   try {
     const { name, weather, imageUrl } = req.body;
 
     if (!name || !weather || !imageUrl) {
+      console.log('❌ Missing required fields');
       return res.status(BAD_REQUEST).send({
         message: 'Name, weather, and imageUrl are required'
       });
@@ -48,14 +51,14 @@ const deleteItem = async (req, res) => {
     const { itemId } = req.params;
     const item = await ClothingItem.findById(itemId);
 
-    // if (!item) {
-    //   return res.status(NOT_FOUND).send({
-    //     message: 'Item not found'
-    //   });
-    // }
-
-    if (!item || !item.owner.equals(req.user._id)) {
+    if (!item) {
       return res.status(NOT_FOUND).send({
+        message: 'Item not found'
+      });
+    }
+
+    if (!item.owner.equals(req.user._id)) {
+      return res.status(FORBIDDEN).send({
         message: 'Item not found or not authorized'
       });
     }
