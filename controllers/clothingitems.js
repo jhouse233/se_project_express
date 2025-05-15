@@ -1,5 +1,5 @@
 const ClothingItem = require('../models/clothingitem');
-const { INTERNAL_SERVER_ERROR, BAD_REQUEST, NOT_FOUND, OK, CREATED, UNAUTHORIZED, FORBIDDEN, CONFLICT_ERROR } = require('../utils/constants');
+const { INTERNAL_SERVER_ERROR, BAD_REQUEST, NOT_FOUND, OK, CREATED, FORBIDDEN } = require('../utils/constants');
 
 // const TEST_USER_ID = '68123daa710934366df09dd9';
 
