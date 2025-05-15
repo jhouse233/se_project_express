@@ -11,8 +11,8 @@ const authorize = (req, res, next) => {
   const token = authorization.replace('Bearer ', '');
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    // req.user = { _id: payload._id };
-    return next();
+    req.user = { _id: payload._id };
+    next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
       return res.status(UNAUTHORIZED).json({ message: 'Authorization token expired or invalid'})
