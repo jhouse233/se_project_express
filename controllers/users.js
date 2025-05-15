@@ -91,9 +91,9 @@ const login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user){
-        return res.status(UNAUTHORIZED).json({ message: 'Unauthorized' })
-      }
+      // if (!user){
+      //   return res.status(UNAUTHORIZED).json({ message: 'Unauthorized' })
+      // }
 
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' })
       return res.status(OK).json({ message: 'Success', token })
