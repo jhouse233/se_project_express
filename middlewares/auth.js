@@ -1,5 +1,5 @@
-const { JWT_SECRET } = require("../utils/config");
 const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = require("../utils/config");
 const { UNAUTHORIZED } = require("../utils/constants");
 
 
@@ -14,11 +14,12 @@ const authorize = (req, res, next) => {
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     req.user = payload;
-    next();
+    return next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
       return res.status(UNAUTHORIZED).json({ message: 'Authorization token expired or invalid'})
-    } else if  (err.name === 'JsonWebTokenError'){
+    }
+    if  (err.name === 'JsonWebTokenError'){
       return res.status(UNAUTHORIZED).json({ message: 'Invalid authorization token format'})
     }
     return res.status(UNAUTHORIZED).json({ message: 'Invalid token'})

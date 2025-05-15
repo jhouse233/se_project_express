@@ -33,11 +33,7 @@ const getCurrentUser = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  console.log('=====================');
-  console.log('createUser endpoint hit');
-  console.log('=====================')
   const { name, avatar, email, password } = req.body;
-  console.log('Request body:', JSON.stringify(req.body));
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(BAD_REQUEST).json({ message: 'Invalid email format' });
@@ -45,7 +41,7 @@ const createUser = (req, res) => {
   if (!name || !avatar || !email || !password){
     return res.status(BAD_REQUEST).json({ message: 'All fields are required' });
   }
-  bcrypt.hash(password, 10)
+  return bcrypt.hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
     .then(user => res.status(CREATED).json({
       message: 'Success',
@@ -93,14 +89,14 @@ const login = (req, res) => {
     return res.status(BAD_REQUEST).json({ message: 'Bad Request'})
   }
 
-  User.findUserByCredentials(email, password)
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       if (!user){
         return res.status(UNAUTHORIZED).json({ message: 'Unauthorized' })
       }
 
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' })
-      return res.status(OK).json({ message: 'Success', token: token })
+      return res.status(OK).json({ message: 'Success', token })
     })
     .catch(err => {
       if (err.message === 'Incorrect email or password'){

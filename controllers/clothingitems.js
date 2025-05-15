@@ -15,13 +15,11 @@ const getAllItems = async (req, res) => {
 };
 
 const createItem = async (req, res) => {
-  console.log('===CREATE ITEM FUNCTION CALLED===')
-  console.log('Request body:', req.body);
+
   try {
     const { name, weather, imageUrl } = req.body;
 
     if (!name || !weather || !imageUrl) {
-      console.log('❌ Missing required fields');
       return res.status(BAD_REQUEST).send({
         message: 'Name, weather, and imageUrl are required'
       });
