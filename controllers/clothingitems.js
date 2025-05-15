@@ -1,12 +1,12 @@
 const ClothingItem = require('../models/clothingitem');
-const { INTERNAL_SERVER_ERROR, BAD_REQUEST, NOT_FOUND, OK, CREATED } = require('../utils/constants');
+const { INTERNAL_SERVER_ERROR, BAD_REQUEST, NOT_FOUND, OK, CREATED, UNAUTHORIZED, FORBIDDEN, CONFLICT_ERROR } = require('../utils/constants');
 
 // const TEST_USER_ID = '68123daa710934366df09dd9';
 
 const getAllItems = async (req, res) => {
   try {
     const items = await ClothingItem.find();
-    return res.status(OK).json({ data: items });
+    return res.status(OK).json(items);
   } catch (err) {
     return res.status(INTERNAL_SERVER_ERROR).send({
       message: 'An error occurred on the server'
@@ -30,7 +30,7 @@ const createItem = async (req, res) => {
       imageUrl,
       owner: req.user._id
     });
-    return res.status(CREATED).send({ data: item });
+    return res.status(CREATED).send(item);
   } catch (err) {
     if (err.name === 'ValidationError') {
       return res.status(BAD_REQUEST).send({
@@ -48,9 +48,15 @@ const deleteItem = async (req, res) => {
     const { itemId } = req.params;
     const item = await ClothingItem.findById(itemId);
 
-    if (!item) {
+    // if (!item) {
+    //   return res.status(NOT_FOUND).send({
+    //     message: 'Item not found'
+    //   });
+    // }
+
+    if (!item || !item.owner.equals(req.user._id)) {
       return res.status(NOT_FOUND).send({
-        message: 'Item not found'
+        message: 'Item not found or not authorized'
       });
     }
 
@@ -88,7 +94,7 @@ const addLike = async (req, res) => {
       { new: true }
     );
 
-    return res.status(OK).json({ data: updatedItem });
+    return res.status(OK).json(updatedItem);
 
   } catch (err) {
     if (err.name === 'CastError') {
@@ -119,7 +125,7 @@ const removeLike = async (req, res) => {
       { new: true }
     );
 
-    return res.status(OK).json({ data: updatedItem });
+    return res.status(OK).json(updatedItem);
   } catch (err) {
     if (err.name === 'CastError') {
       return res.status(BAD_REQUEST).send({
