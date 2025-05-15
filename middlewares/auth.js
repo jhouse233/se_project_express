@@ -3,8 +3,6 @@ const { JWT_SECRET } = require("../utils/config");
 const { UNAUTHORIZED } = require("../utils/constants");
 
 
-
-
 const authorize = (req, res, next) => {
   const { authorization } = req.headers;
   if (!authorization) {

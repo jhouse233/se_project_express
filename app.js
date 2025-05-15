@@ -11,14 +11,16 @@ const clothingItemsRouter = require('./routes/clothingitems');
 const { login, createUser } = require('./controllers/users');
 
 const { NOT_FOUND } = require('./utils/constants')
+const { authorize } = require('./middlewares/auth');
+
 
 mongoose.connect('mongodb://127.0.0.1:27017/wtwr_db');
 app.use(cors());
 app.use(express.json());
 
 
-app.use('/items', clothingItemsRouter);
-app.use('/users', userRouter);
+app.use('/items', authorize, clothingItemsRouter);
+app.use('/users', authorize, userRouter);
 
 app.post('/signup', createUser);
 app.post('/signin', login);
