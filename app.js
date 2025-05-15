@@ -25,8 +25,8 @@ app.use(express.json());
 // });
 
 
-app.use('/items', authorize, clothingItemsRouter);
-app.use('/users', authorize, userRouter);
+app.use('/items', clothingItemsRouter);
+app.use('/users', userRouter);
 
 app.post('/signup', createUser);
 app.post('/signin', login);
