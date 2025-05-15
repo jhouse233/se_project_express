@@ -30,7 +30,7 @@ app.use(express.json());
 app.use('/items', clothingItemsRouter);
 app.use('/users', userRouter);
 
-app.post('/signup', createUser);
+app.post('/users', createUser);
 app.post('/signin', login);
 
 
