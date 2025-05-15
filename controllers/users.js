@@ -34,10 +34,10 @@ const getCurrentUser = (req, res) => {
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(BAD_REQUEST).json({ message: 'Invalid email format' });
-  }
+  // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // if (!emailRegex.test(email)) {
+  //   return res.status(BAD_REQUEST).json({ message: 'Invalid email format' });
+  // }
   if (!name || !avatar || !email || !password){
     return res.status(BAD_REQUEST).json({ message: 'All fields are required' });
   }
