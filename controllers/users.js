@@ -40,7 +40,7 @@ const createUser = (req, res) => {
   // }
   // if (!name || !avatar || !email || !password){
   if (!email || !password) {
-    return res.status(BAD_REQUEST).json({ message: 'All fields are required' });
+    return res.status(BAD_REQUEST).json({ message: 'Email and password are required' });
   }
   return bcrypt.hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
@@ -56,7 +56,7 @@ const createUser = (req, res) => {
         return res.status(CONFLICT_ERROR).json({ message: 'Email already exists' })
       }
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).json({ message: 'Bad Request'});
+        return res.status(BAD_REQUEST).json({ message: err.message});
       }
       return res.status(INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error'});
     });
