@@ -7,7 +7,7 @@ router.get('/me', authorize, getCurrentUser);
 router.get('/', authorize, getUsers);
 router.patch('/me', authorize, updateUser);
 router.post('/', createUser);
-router.post('/basic', createBasicUser);
+router.post('/users/basic', createBasicUser);
 
 
 module.exports = router;
