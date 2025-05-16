@@ -8,7 +8,7 @@ const app = express();
 const userRouter = require('./routes/users');
 const clothingItemsRouter = require('./routes/clothingitems');
 
-const { login, createUser } = require('./controllers/users');
+const { login, createBasicUser } = require('./controllers/users');
 
 const { NOT_FOUND } = require('./utils/constants')
 // const { authorize } = require('./middlewares/auth');
@@ -23,7 +23,7 @@ app.use(express.json());
 //   };
 //   next();
 // });
-app.post('/signup', createUser);
+app.post('/signup', createBasicUser);
 app.post('/signin', login);
 
 app.use('/items', clothingItemsRouter);
