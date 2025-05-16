@@ -66,16 +66,16 @@ const createBasicUser = (req, res) => {
   if (!name || !avatar) {
     return res.status(BAD_REQUEST).json({ message: 'All fields are required' });
   }
-  User.create({ name, avatar })
-  .then(user => {
-    return res.status(CREATED).json(user);
-  })
-  .catch(err => {
-    if (err.name === 'ValidationError') {
-      return res.status(BAD_REQUEST).json({ message: 'Bad Request'});
-    }
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error'})
-  })
+  return User.create({ name, avatar })
+    .then(user => {
+      return res.status(CREATED).json(user);
+    })
+    .catch(err => {
+      if (err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST).json({ message: 'Bad Request'});
+      }
+      return res.status(INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error'})
+    })
 }
 
 const updateUser = (req, res) => {
