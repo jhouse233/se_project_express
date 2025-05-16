@@ -135,5 +135,4 @@ module.exports = {
   login,
   getCurrentUser,
   updateUser,
-  createBasicUser
 };
