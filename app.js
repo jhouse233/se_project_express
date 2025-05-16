@@ -8,7 +8,7 @@ const app = express();
 const userRouter = require('./routes/users');
 const clothingItemsRouter = require('./routes/clothingitems');
 
-const { login } = require('./controllers/users');
+const { login, createUser } = require('./controllers/users');
 
 const { NOT_FOUND } = require('./utils/constants')
 // const { authorize } = require('./middlewares/auth');
@@ -23,16 +23,11 @@ app.use(express.json());
 //   };
 //   next();
 // });
-
-
-
+app.post('/signup', createUser);
+app.post('/signin', login);
 
 app.use('/items', clothingItemsRouter);
 app.use('/users', userRouter);
-
-// app.post('/users', createUser);
-app.post('/signin', login);
-
 
 app.use((req, res) => {
   res.status(NOT_FOUND).send({ message: 'Requested resource not found'})
