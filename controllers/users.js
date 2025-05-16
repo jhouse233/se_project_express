@@ -67,9 +67,7 @@ const createBasicUser = (req, res) => {
     return res.status(BAD_REQUEST).json({ message: 'All fields are required' });
   }
   return User.create({ name, avatar })
-    .then(user => {
-      return res.status(CREATED).json(user);
-    })
+    .then(user => {res.status(CREATED).json(user)})
     .catch(err => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).json({ message: 'Bad Request'});
