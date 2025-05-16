@@ -38,7 +38,8 @@ const createUser = (req, res) => {
   // if (!emailRegex.test(email)) {
   //   return res.status(BAD_REQUEST).json({ message: 'Invalid email format' });
   // }
-  if (!name || !avatar || !email || !password){
+  // if (!name || !avatar || !email || !password){
+  if (!email || !password) {
     return res.status(BAD_REQUEST).json({ message: 'All fields are required' });
   }
   return bcrypt.hash(password, 10)
@@ -61,26 +62,26 @@ const createUser = (req, res) => {
     });
 };
 
-const createBasicUser = (req, res) => {
-  const { name, avatar } = req.body;
-  if (!name || !avatar) {
-    return res.status(BAD_REQUEST).json({ message: 'All fields are required' });
-  }
-  return User.create({ name, avatar })
-    .then(user => {
-      res.status(CREATED).json({
-        _id: user._id,
-        name: user.name,
-        avatar: user.avatar
-      })
-    })
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).json({ message: 'Bad Request'});
-      }
-      return res.status(INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error'})
-    })
-}
+// const createBasicUser = (req, res) => {
+//   const { name, avatar } = req.body;
+//   if (!name || !avatar) {
+//     return res.status(BAD_REQUEST).json({ message: 'All fields are required' });
+//   }
+//   return User.create({ name, avatar })
+//     .then(user => {
+//       res.status(CREATED).json({
+//         _id: user._id,
+//         name: user.name,
+//         avatar: user.avatar
+//       })
+//     })
+//     .catch(err => {
+//       if (err.name === 'ValidationError') {
+//         return res.status(BAD_REQUEST).json({ message: 'Bad Request'});
+//       }
+//       return res.status(INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error'})
+//     })
+// }
 
 const updateUser = (req, res) => {
   const { name, avatar } = req.body;
