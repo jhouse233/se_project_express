@@ -2,22 +2,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { CREATED, BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED, OK, CONFLICT_ERROR } = require('../utils/constants');
-
-
 const { JWT_SECRET } = require('../utils/config');
-
-
-
-const getUsers = (req, res) => {
-  User.find({}).select('-password')
-    .then(users => res.json(users))
-    .catch((err) => res.status(INTERNAL_SERVER_ERROR).json({ message: 'Error getting users', error: err.message}));
-};
-
 
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
-  User.findById(userId).select('-password')
+  User.findById(userId)
     .then(user => {
       if (!user) {
         return res.status(NOT_FOUND).json({ message: 'User not found'})
@@ -76,6 +65,9 @@ const updateUser = (req, res) => {
     if (err.name === 'CastError') {
       return res.status(BAD_REQUEST).json({ message: 'Invalid user ID'});
     }
+    if (err.name === 'ValidationError') {
+      return res.status(BAD_REQUEST).json({ message: err.message})
+    }
     return res.status(INTERNAL_SERVER_ERROR).json({ message: 'Error getting user'});
   })
 };
@@ -106,7 +98,6 @@ const login = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   createUser,
   login,
   getCurrentUser,
