@@ -1,28 +1,27 @@
 const ClothingItem = require('../models/clothingitem');
-const { INTERNAL_SERVER_ERROR, BAD_REQUEST, NOT_FOUND, OK, CREATED, FORBIDDEN } = require('../utils/constants');
+const { OK, CREATED } = require('../utils/constants');
+
+const BadRequestError = require('../errors/BadRequestError');
+const ForbiddenError = require('../errors/ForbiddenError');
+const NotFoundError = require('../errors/NotFoundError');
 
 // const TEST_USER_ID = '68123daa710934366df09dd9';
 
-const getAllItems = async (req, res) => {
+const getAllItems = async (req, res, next) => {
   try {
     const items = await ClothingItem.find();
     return res.status(OK).json(items);
   } catch (err) {
-    return res.status(INTERNAL_SERVER_ERROR).send({
-      message: 'An error occurred on the server'
-    });
+    next(err);
   }
 };
 
-const createItem = async (req, res) => {
-
+const createItem = async (req, res, next) => {
   try {
     const { name, weather, imageUrl } = req.body;
 
     if (!name || !weather || !imageUrl) {
-      return res.status(BAD_REQUEST).send({
-        message: 'Name, weather, and imageUrl are required'
-      });
+      throw new BadRequestError('Name, weather, and imageUrl are required')
     }
 
     const item = await ClothingItem.create({
@@ -34,31 +33,23 @@ const createItem = async (req, res) => {
     return res.status(CREATED).send(item);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(BAD_REQUEST).send({
-        message: 'Invalid data format'
-      });
+      return next(new BadRequestError('Invalid data format'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({
-      message: 'An error occurred on the server'
-    });
+    next(err);
   }
 };
 
-const deleteItem = async (req, res) => {
+const deleteItem = async (req, res, next) => {
   try {
     const { itemId } = req.params;
     const item = await ClothingItem.findById(itemId);
 
     if (!item) {
-      return res.status(NOT_FOUND).send({
-        message: 'Item not found'
-      });
+      throw new NotFoundError('Item not found')
     }
 
     if (!item.owner.equals(req.user._id)) {
-      return res.status(FORBIDDEN).send({
-        message: 'Item not found or not authorized'
-      });
+      throw new ForbiddenError('Item not found or not authorized');
     }
 
     await ClothingItem.findByIdAndDelete(itemId);
@@ -68,25 +59,19 @@ const deleteItem = async (req, res) => {
 
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(BAD_REQUEST).send({
-        message: 'Invalid item ID'
-      });
+      return next(new BadRequestError('Invalid item ID'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({
-      message: 'An error occurred on the server'
-    });
+    next(err);
   }
 };
 
-const addLike = async (req, res) => {
+const addLike = async (req, res, next) => {
   try {
     const { itemId } = req.params;
     const item = await ClothingItem.findById(itemId);
 
     if (!item) {
-      return res.status(NOT_FOUND).send({
-        message: 'Item not found'
-      });
+      throw new NotFoundError('Item not found')
     }
 
     const updatedItem = await ClothingItem.findByIdAndUpdate(
@@ -99,25 +84,19 @@ const addLike = async (req, res) => {
 
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(BAD_REQUEST).send({
-        message: 'Invalid item ID'
-      });
+      return next(new BadRequestError('Invalid item ID'));
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({
-      message: 'An error occurred on the server'
-    });
+    next(err);
   }
 };
 
-const removeLike = async (req, res) => {
+const removeLike = async (req, res, next) => {
   try {
     const { itemId } = req.params;
     const item = await ClothingItem.findById(itemId);
 
     if (!item) {
-      return res.status(NOT_FOUND).send({
-        message: 'Item not found'
-      });
+      throw new NotFoundError('Item not found')
     }
 
     const updatedItem = await ClothingItem.findByIdAndUpdate(
@@ -129,13 +108,9 @@ const removeLike = async (req, res) => {
     return res.status(OK).json(updatedItem);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(BAD_REQUEST).send({
-        message: 'Invalid item ID'
-      });
+      return next(new BadRequestError('Invalid item ID'))
     }
-    return res.status(INTERNAL_SERVER_ERROR).send({
-      message: 'An error occurred on the server'
-    });
+    next(err);
   }
 };
 

@@ -4,20 +4,25 @@ const User = require('../models/user');
 const { CREATED, BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR, UNAUTHORIZED, OK, CONFLICT_ERROR } = require('../utils/constants');
 const { JWT_SECRET } = require('../utils/config');
 
+const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
+const NotFoundError = require('../errors/NotFoundError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
+
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
   User.findById(userId)
     .then(user => {
       if (!user) {
-        return res.status(NOT_FOUND).json({ message: 'User not found'})
+        throw new NotFoundError('User not found')
       }
       return res.json(user);
     })
     .catch(err => {
       if (err.name === 'CastError') {
-        return res.status(BAD_REQUEST).json({ message: 'Invalid user ID'});
+        return next(new BadRequestError('Invalid user ID'))
       }
-      return res.status(INTERNAL_SERVER_ERROR).json({ message: 'Error getting user'});
+      next(err);
     })
 };
 
@@ -25,7 +30,7 @@ const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(BAD_REQUEST).json({ message: 'Email and password are required' });
+    return next(new BadRequestError('Email and password are required'))
   }
   return bcrypt.hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
@@ -38,12 +43,12 @@ const createUser = (req, res) => {
     }))
     .catch(err => {
       if (err.code === 11000) {
-        return res.status(CONFLICT_ERROR).json({ message: 'Email already exists' })
+        return next(new ConflictError('Email already exists'));
       }
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).json({ message: err.message});
+        return next(new BadRequestError(err.message))
       }
-      return res.status(INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error'});
+      next(err);
     });
 };
 
@@ -57,18 +62,18 @@ const updateUser = (req, res) => {
     .select('-password')
   .then(user => {
     if (!user) {
-      return res.status(NOT_FOUND).json({ message: 'User not found'})
+      throw new NotFoundError('User not found')
     }
-    return res.json(user);
+    res.json(user);
   })
   .catch(err => {
     if (err.name === 'CastError') {
-      return res.status(BAD_REQUEST).json({ message: 'Invalid user ID'});
+      return next(new BadRequestError('Invalid user ID'));
     }
     if (err.name === 'ValidationError') {
       return res.status(BAD_REQUEST).json({ message: err.message})
     }
-    return res.status(INTERNAL_SERVER_ERROR).json({ message: 'Error getting user'});
+    return next(new BadRequestError(err.message));
   })
 };
 
@@ -76,25 +81,20 @@ const login = (req, res) => {
   const {email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(BAD_REQUEST).json({ message: 'Bad Request'})
+    return next(new BadRequestError('Email and password are required'));
   }
 
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user){
-        return res.status(UNAUTHORIZED).json({ message: 'Unauthorized' })
-      }
-
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' })
-      return res.status(OK).json({ message: 'Success', token })
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+      res.status(OK).json({ message: 'Success', token });
     })
     .catch(err => {
-      if (err.message === 'Incorrect email or password'){
-        return res.status(UNAUTHORIZED).json({ message: err.message });
+      if (err.message === 'Incorrect email or password') {
+        return next(new UnauthorizedError(err.message));
       }
-      return res.status(INTERNAL_SERVER_ERROR).json({ message: 'Internal Server Error'})
-
-    })
+      next(err);
+    });
 };
 
 module.exports = {
