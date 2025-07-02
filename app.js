@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-
+require('dotenv').config()
 const { PORT = 3001 } = process.env;
 const app = express();
 
@@ -38,7 +38,7 @@ app.use(errors());
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   // eslint-disable-next-line no-console
   console.log(`App listening at port ${PORT}`);
 });
